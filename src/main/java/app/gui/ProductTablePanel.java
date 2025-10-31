@@ -1,13 +1,18 @@
 package app.gui;
 
-import app.model.Product;
-import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-import java.awt.*;
+import java.awt.BorderLayout;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+
+import app.model.Product;
 
 /**
  * Table panel showing product results. Backed by an in-memory list for now.
@@ -37,13 +42,16 @@ public class ProductTablePanel extends RoundedPanel {
     public Product getSelected() { int r = table.getSelectedRow(); if (r < 0) return null; return model.getAt(r); }
     public void refresh() { model.fireTableDataChanged(); }
 
-    static class ProductTableModel extends AbstractTableModel {
+    public ProductTableModel getModel() { return model; }
+
+    public static class ProductTableModel extends AbstractTableModel {
         private final String[] cols = {"ID","Description","Brand","Content","Price","Category","Status","Date made","Expiration"};
         private final List<Product> data = new ArrayList<>();
         private final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
         public void setProducts(List<Product> p) { data.clear(); if (p != null) data.addAll(p); fireTableDataChanged(); }
         public Product getAt(int r) { return data.get(r); }
+        public List<Product> getData() { return data; }
 
         @Override public int getRowCount() { return data.size(); }
         @Override public int getColumnCount() { return cols.length; }
