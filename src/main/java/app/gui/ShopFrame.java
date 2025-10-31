@@ -24,6 +24,7 @@ import app.model.Product;
  * Main application frame composing the form, search and table panels plus action buttons.
  */
 public class ShopFrame extends JFrame {
+    private static final Dimension MIN_DIMENSION = new Dimension(1100, 520);
     private ProductFormPanel formPanel;
     private ProductTablePanel tablePanel;
     private SearchPanel searchPanel;
@@ -31,7 +32,8 @@ public class ShopFrame extends JFrame {
     public ShopFrame() {
         super("Shop Project - Product Catalog");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1000, 520);
+        setMinimumSize(MIN_DIMENSION);
+        setSize(MIN_DIMENSION);
         setLocationRelativeTo(null);
 
         JPanel main = new JPanel(new GridBagLayout());
