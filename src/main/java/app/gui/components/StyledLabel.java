@@ -22,7 +22,7 @@ public class StyledLabel extends JLabel {
             }
             case SECTION -> {
                 setFont(new Font("Segoe UI", Font.BOLD | Font.ITALIC, 14));
-                setForeground(new Color(0xEA, 0xF6, 0xFF));
+                setForeground(new Color(0x1F, 0x80, 0xFF));
             }
             default -> {
                 setFont(new Font("Segoe UI", Font.BOLD, 12));
