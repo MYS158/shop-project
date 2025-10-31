@@ -16,7 +16,7 @@ public final class ValidationUtils {
     private ValidationUtils() { }
 
     public static boolean isValidId(int id) {
-        return id >= 1 && id <= 9999;
+        return id >= 0 && id <= 9999;
     }
 
     public static boolean isValidPrice(double price) {

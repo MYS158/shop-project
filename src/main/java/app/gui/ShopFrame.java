@@ -253,7 +253,22 @@ public class ShopFrame extends JFrame {
         else if (props.getProperty("db.password") != null) normalized.setProperty("jdbc.password", props.getProperty("db.password"));
 
         // If the file used "db.url" with jdbc:mysql... then normalized will contain jdbc.url
+        // System.out.println("Loaded DB props: " + normalized.getProperty("jdbc.url") + " user=" + normalized.getProperty("jdbc.username"));
         db = DatabaseManager.fromProperties(normalized);
+        /*
+        try (Connection c = db.getConnection()) {
+            java.sql.Statement st = c.createStatement();
+            try (java.sql.ResultSet rs = st.executeQuery("SELECT CURRENT_USER(), DATABASE()")) {
+                if (rs.next()) {
+                    System.out.println("App DB test -> auth: " + rs.getString(1) + " database: " + rs.getString(2));
+                    JOptionPane.showMessageDialog(this, "DB test ok: " + rs.getString(1) + " -> " + rs.getString(2));
+                }
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "DB test FAILED: " + ex.getMessage(), "DB Error", JOptionPane.ERROR_MESSAGE);
+            throw ex;
+        }
+        */
 
         // run schema (safe: ignore if already exists)
         MigrationRunner runner = new MigrationRunner(db);

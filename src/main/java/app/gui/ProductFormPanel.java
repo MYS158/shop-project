@@ -53,7 +53,7 @@ public class ProductFormPanel extends RoundedPanel {
         add(title, c);
 
         // Row 1: ID + Description
-        idField = new JTextField(); idField.setColumns(8); idField.setEditable(false);
+        idField = new JTextField(); idField.setColumns(8); idField.setEditable(true);
         LabeledField idLf = new LabeledField("ID:", idField, 80);
         c.gridy = 1; c.gridwidth = 1; c.weightx = 0;
         add(idLf, c);
