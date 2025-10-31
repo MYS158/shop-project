@@ -26,7 +26,7 @@ A Java-based inventory management application that uses a **MySQL database** and
 | ------------------------------------------------------------------------------------------------------------- |
 | | ID: | TextField |  Description: | TextField                |                                    | | Add | Update | Delete | Search |
 | | Brand: | ComboBox |  Content: | TextField |  Price: | TextField |                               |                                  |
-| | Category: (RadioButtons) | Abarrotes | Personal Hygiene | Fruits & Vegetables | Wines & Liquors | |                                |
+| | Category: (RadioButtons) | Groceries | Personal Hygiene | Fruits & Vegetables | Wines & Liquors | |                                |
 | | Status: | Checkbox (Active) |                                                                      |                                  |
 | | Date made: | DateField (JCalendar) |                                                                |                                  |
 | | Expiration date: | DateField (JCalendar) |                                                        |                                  |
