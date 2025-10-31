@@ -132,7 +132,7 @@ shop-project/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/shop-project.git
+   git clone https://github.com/MYS158/shop-project.git
    cd shop-project
    ```
 
