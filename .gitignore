@@ -1,0 +1,11 @@
+*.class
+*.log
+*.tmp
+*.bak
+*.swp
+.idea/
+.vs/
+.vscode/
+node_modules/
+target/
+.DS_Store
