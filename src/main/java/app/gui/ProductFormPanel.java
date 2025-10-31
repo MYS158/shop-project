@@ -9,6 +9,7 @@ import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
@@ -35,6 +36,7 @@ public class ProductFormPanel extends RoundedPanel {
     private final ButtonGroup categoryGroup;
     private final DatePickerField madeField;
     private final DatePickerField expField;
+    private final JButton clearButton;
 
     public ProductFormPanel() {
         super(16);
@@ -98,16 +100,21 @@ public class ProductFormPanel extends RoundedPanel {
         }
         add(categoryPanel, c);
 
-        // Row 4: Dates
+        // Row 4: Dates and Clear Button
         c.gridy = 4; c.gridx = 0; c.gridwidth = 1; c.weightx = 0.5;
         madeField = new DatePickerField();
         LabeledField madeLf = new LabeledField("Date made:", madeField, 80);
         add(madeLf, c);
 
-        c.gridx = 1; c.gridwidth = 2; c.weightx = 0.5;
+        c.gridx = 1; c.gridwidth = 1; c.weightx = 0.5;
         expField = new DatePickerField();
         LabeledField expLf = new LabeledField("Expiration date:", expField, 120);
         add(expLf, c);
+
+        c.gridx = 2; c.gridwidth = 1; c.weightx = 0.5;
+        clearButton = new JButton("Clear");
+        clearButton.addActionListener(e -> clear());
+        add(clearButton, c);
     }
 
     public Product toProduct() {
@@ -144,7 +151,7 @@ public class ProductFormPanel extends RoundedPanel {
 
     public void clear() {
         idField.setText(""); descField.setText(""); brandCombo.setSelectedIndex(0);
-        contentField.setText(""); priceField.setDouble(0.0); activeCheck.setSelected(true);
+        contentField.setText(""); priceField.setDouble(0.0); activeCheck.setSelected(false);
         categoryGroup.clearSelection(); madeField.setDate(null); expField.setDate(null);
     }
 }
