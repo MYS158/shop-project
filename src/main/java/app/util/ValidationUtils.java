@@ -7,10 +7,10 @@ import java.util.Set;
 
 public final class ValidationUtils {
     private static final Set<String> ALLOWED_CATEGORIES = new HashSet<>(Arrays.asList(
-            "Groceries",
-            "Personal Hygiene",
-            "Fruits & Vegetables",
-            "Wines & Liquors"
+        "Groceries",
+        "Personal Hygiene",
+        "Fruits & Vegetables",
+        "Wines & Liquors"
     ));
 
     private ValidationUtils() { }

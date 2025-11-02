@@ -89,11 +89,11 @@ public class ShopFrame extends JFrame {
         rightCol.setLayout(new BoxLayout(rightCol, BoxLayout.Y_AXIS));
         rightCol.setPreferredSize(new Dimension(160, 0));
 
-        RoundedButton addBtn = new RoundedButton("<html>Add</html>");
-        RoundedButton upBtn = new RoundedButton("<html>Update</html>");
-        RoundedButton delBtn = new RoundedButton("<html>Delete</html>");
-        RoundedButton conBtn = new RoundedButton("<html>Consult</html>");
-        RoundedButton refreshBtn = new RoundedButton("<html>Refresh</html>");
+        RoundedButton addBtn = new RoundedButton("Add");
+        RoundedButton upBtn = new RoundedButton("Update");
+        RoundedButton delBtn = new RoundedButton("Delete");
+        RoundedButton conBtn = new RoundedButton("Consult");
+        RoundedButton refreshBtn = new RoundedButton("Refresh");
         rightCol.add(addBtn); rightCol.add(Box.createVerticalStrut(8));
         rightCol.add(upBtn); rightCol.add(Box.createVerticalStrut(8));
         rightCol.add(delBtn); rightCol.add(Box.createVerticalStrut(8));
