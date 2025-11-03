@@ -28,6 +28,7 @@ public class ProductTablePanel extends RoundedPanel {
         table = new JTable(model);
         table.setRowHeight(28);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.getTableHeader().setReorderingAllowed(false);
 
         // Price renderer
         DefaultTableCellRenderer right = new DefaultTableCellRenderer();
@@ -45,7 +46,7 @@ public class ProductTablePanel extends RoundedPanel {
     public ProductTableModel getModel() { return model; }
 
     public static class ProductTableModel extends AbstractTableModel {
-        private final String[] cols = {"ID","Description","Brand","Content","Price","Category","Status","Date made","Expiration"};
+        private final String[] cols = {"ID", "Description", "Brand", "Content", "Price", "Category", "Status", "Date made", "Expiration"};
         private final List<Product> data = new ArrayList<>();
         private final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
@@ -71,5 +72,6 @@ public class ProductTablePanel extends RoundedPanel {
                 default -> "";
             };
         }
+        @Override public boolean isCellEditable(int r, int c) { return false; }
     }
 }

@@ -11,104 +11,181 @@ import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 
+import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.plaf.basic.BasicHTML;
 import javax.swing.text.View;
 
+/**
+ * Simple rounded button with optional icon support.
+ *
+ * Behavior:
+ *  - Renders HTML text if provided (wraps plain text into simple HTML).
+ *  - Will only paint an icon if one was successfully set via the provided setters.
+ *  - Fixed preferred width/height can be changed via setters.
+ *
+ * This version intentionally does NOT draw any default circular icon or plus glyph.
+ */
 public class RoundedButton extends JButton {
-    private int arc = 18;
-    private int fixedWidth = 140;
-    private int fixedHeight = 72;
-    private Color bg = new Color(0x0A, 0x1B, 0x2E);
-    private Color border = new Color(0xCF, 0xE7, 0xFF);
-    private Icon customIcon = null;
-    private boolean drawIconCircle = true;
 
+    // --- defaults ---
+    private static final int DEFAULT_ARC = 18;
+    private static final int DEFAULT_WIDTH = 140;
+    private static final int DEFAULT_HEIGHT = 72;
+    private static final Color DEFAULT_BG = new Color(0x0A, 0x1B, 0x2E);
+    private static final Color DEFAULT_BORDER = new Color(0xCF, 0xE7, 0xFF);
+    private static final Color DEFAULT_FG = new Color(0xEA, 0xF6, 0xFF);
+
+    // --- instance state ---
+    private int arc = DEFAULT_ARC;
+    private int fixedWidth = DEFAULT_WIDTH;
+    private int fixedHeight = DEFAULT_HEIGHT;
+    private Color bg = DEFAULT_BG;
+    private Color border = DEFAULT_BORDER;
+    private Icon customIcon = null; // only painted when non-null
+
+    // --- constructors ---
     public RoundedButton(String text) {
         super(wrapHtml(text));
+        initialize();
+    }
+
+    public RoundedButton(String text, String iconResourcePath) {
+        super(wrapHtml(text));
+        initialize();
+        if (iconResourcePath != null && !iconResourcePath.isBlank()) {
+            setCustomIconResource(iconResourcePath);
+        }
+    }
+
+    private void initialize() {
         setOpaque(false);
         setContentAreaFilled(false);
         setFocusPainted(false);
         setBorderPainted(false);
-        setForeground(new Color(0xEA, 0xF6, 0xFF));
+        setForeground(DEFAULT_FG);
         setFont(getFont().deriveFont(Font.BOLD, 14f));
         setPreferredSize(new Dimension(fixedWidth, fixedHeight));
         setMinimumSize(new Dimension(fixedWidth, fixedHeight));
     }
 
-    public RoundedButton(String text, String iconPath) {
-        this(text);
-        setCustomIcon(iconPath);
-    }
-
+    // --- simple HTML wrapper for convenience ---
     private static String wrapHtml(String s) {
         if (s == null) return "<html></html>";
-        String t = s;
-        if (!BasicHTML.isHTMLString(t)) t = String.format("<html>%s</html>", escapeForHtml(t));
-        return t;
+        if (BasicHTML.isHTMLString(s)) return s;
+        // escape minimal risky chars and wrap
+        String safe = s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br/>");
+        return "<html>" + safe + "</html>";
     }
 
-    private static String escapeForHtml(String s) {
-        return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br/>");
-    }
-
-    public void setArc(int arc) {
-        this.arc = arc;
-        repaint();
-    }
-
-    public void setBg(Color bg) {
-        this.bg = bg;
-        repaint();
-    }
-
-    public void setBorderColor(Color color) {
-        this.border = color;
-        repaint();
-    }
-
-    public void setDrawIconCircle(boolean draw) {
-        this.drawIconCircle = draw;
-        repaint();
-    }
+    // --- appearance setters ---
+    public void setArc(int arc) { this.arc = Math.max(0, arc); repaint(); }
+    public void setBg(Color bg) { this.bg = bg == null ? DEFAULT_BG : bg; repaint(); }
+    public void setBorderColor(Color c) { this.border = c == null ? DEFAULT_BORDER : c; repaint(); }
 
     public void setFixedWidth(int width) {
         this.fixedWidth = Math.max(48, width);
         setPreferredSize(new Dimension(fixedWidth, fixedHeight));
         setMinimumSize(new Dimension(fixedWidth, fixedHeight));
-        revalidate();
-        repaint();
+        revalidate(); repaint();
     }
 
     public void setFixedHeight(int height) {
         this.fixedHeight = Math.max(28, height);
         setPreferredSize(new Dimension(fixedWidth, fixedHeight));
         setMinimumSize(new Dimension(fixedWidth, fixedHeight));
-        revalidate();
-        repaint();
+        revalidate(); repaint();
     }
 
-    public final void setCustomIcon(String path) {
-        if (path != null && !path.isEmpty()) {
-            Image img = new ImageIcon(path).getImage();
-            Image scaled = img.getScaledInstance(48, 48, Image.SCALE_SMOOTH);
-            this.customIcon = new ImageIcon(scaled);
-        } else {
+    // --- icon setters (simple and explicit) ---
+
+    /**
+     * Set an Icon instance directly (useful for pre-loaded ImageIcon).
+     */
+    public void setCustomIcon(Icon icon) {
+        this.customIcon = icon;
+        revalidate(); repaint();
+    }
+
+    /**
+     * Load icon from classpath resource. Example: "/static/icons/add.png"
+     * Tries the given path and also toggles leading slash if needed.
+     * If loading fails, icon is cleared.
+     */
+    public final void setCustomIconResource(String resourcePath) {
+        if (resourcePath == null || resourcePath.isBlank()) { setCustomIcon((Icon) null); return; }
+        try {
+            URL res = getClass().getResource(resourcePath);
+            if (res == null) {
+                // try adding/removing leading slash
+                String alt = resourcePath.startsWith("/") ? resourcePath.substring(1) : "/" + resourcePath;
+                res = getClass().getResource(alt);
+            }
+            if (res == null) {
+                // not found on classpath
+                this.customIcon = null;
+            } else {
+                BufferedImage img = ImageIO.read(res);
+                this.customIcon = img == null ? null : scaleToIcon(img);
+            }
+        } catch (IOException ex) {
+            System.err.println("RoundedButton: failed to load resource '" + resourcePath + "': " + ex.getMessage());
             this.customIcon = null;
         }
-        revalidate();
-        repaint();
+        revalidate(); repaint();
     }
 
+    /**
+     * Load icon from a filesystem path or URL string. If loading fails, icon is cleared.
+     */
+    public void setCustomIconPath(String pathOrUrl) {
+        if (pathOrUrl == null || pathOrUrl.isBlank()) { setCustomIcon((Icon) null); return; }
+        try {
+            BufferedImage img = null;
+            File f = new File(pathOrUrl);
+            if (f.exists()) {
+                img = ImageIO.read(f);
+            } else {
+                try {
+                    img = ImageIO.read(new URL(pathOrUrl));
+                } catch (IOException ignored) { /* not a URL or failed */ }
+            }
+            this.customIcon = img == null ? null : scaleToIcon(img);
+        } catch (IOException ex) {
+            System.err.println("RoundedButton: failed to load path/url '" + pathOrUrl + "': " + ex.getMessage());
+            this.customIcon = null;
+        }
+        revalidate(); repaint();
+    }
+
+    // helper to scale a BufferedImage into an Icon (keeps aspect ratio)
+    private Icon scaleToIcon(BufferedImage img) {
+        int target = Math.min(48, Math.max(16, fixedHeight - 24)); // fit inside button height
+        int iw = img.getWidth();
+        int ih = img.getHeight();
+        float scale = 1f;
+        if (iw > target || ih > target) {
+            scale = Math.min((float) target / iw, (float) target / ih);
+        }
+        int w = Math.max(1, Math.round(iw * scale));
+        int h = Math.max(1, Math.round(ih * scale));
+        Image scaled = img.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+        return new ImageIcon(scaled);
+    }
+
+    // --- text override to keep HTML wrapping consistent ---
     @Override
     public void setText(String text) {
         super.setText(wrapHtml(text));
         putClientProperty(BasicHTML.propertyKey, null);
-        revalidate();
-        repaint();
+        revalidate(); repaint();
     }
 
     @Override
@@ -117,6 +194,7 @@ public class RoundedButton extends JButton {
         return new Dimension(fixedWidth, Math.max(fixedHeight, base.height));
     }
 
+    // --- painting: background, border, optional icon, text ---
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();
@@ -127,53 +205,34 @@ public class RoundedButton extends JButton {
             int w = getWidth();
             int h = getHeight();
 
+            // background
             g2.setColor(bg);
             g2.fillRoundRect(0, 0, w, h, arc, arc);
 
+            // border
             g2.setStroke(new BasicStroke(2f));
             g2.setColor(border);
             g2.drawRoundRect(0, 0, w - 1, h - 1, arc, arc);
 
-            int circleSize = Math.min(h - 20, 48);
-            int circleX = 12;
-            int circleY = (h - circleSize) / 2;
+            // icon area: if customIcon is set, draw it aligned to the left with some padding
+            int iconAreaLeft = 12;
+            int iconAreaRightPadding = 12;
+            int textX = 16; // default text start if no icon
 
-            if (drawIconCircle) {
-                g2.setColor(new Color(0xEA, 0xF6, 0xFF));
-                g2.fillOval(circleX - 2, circleY - 2, circleSize + 4, circleSize + 4);
-                g2.setColor(Color.BLACK);
-                g2.fillOval(circleX, circleY, circleSize, circleSize);
-
-                if (customIcon != null) {
-                    int iconW = customIcon.getIconWidth();
-                    int iconH = customIcon.getIconHeight();
-
-                    float scale = 1f;
-                    int padding = 8;
-                    int max = circleSize - padding * 2;
-                    if (iconW > max || iconH > max) {
-                        scale = Math.min((float) max / iconW, (float) max / iconH);
-                    }
-                    int drawW = Math.round(iconW * scale);
-                    int drawH = Math.round(iconH * scale);
-                    int ix = circleX + (circleSize - drawW) / 2;
-                    int iy = circleY + (circleSize - drawH) / 2;
-
-                    Graphics2D gIcon = (Graphics2D) g2.create();
-                    try {
-                        gIcon.translate(ix, iy);
-                        customIcon.paintIcon(this, gIcon, 0, 0);
-                    } finally {
-                        gIcon.dispose();
-                    }
-                }
+            if (customIcon != null) {
+                int iconW = customIcon.getIconWidth();
+                int iconH = customIcon.getIconHeight();
+                int ix = iconAreaLeft;
+                int iy = (h - iconH) / 2;
+                customIcon.paintIcon(this, g2, ix, iy);
+                textX = ix + iconW + iconAreaRightPadding;
             }
 
-            String text = getText();
-            int textX = drawIconCircle ? (circleX + circleSize + 12) : 16;
+            // compute available text area
             int textWidth = Math.max(16, w - textX - 12);
             int textHeight = h;
 
+            String text = getText();
             boolean isHtml = text != null && BasicHTML.isHTMLString(text);
 
             if (isHtml) {

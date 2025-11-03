@@ -1,5 +1,7 @@
 package app.model;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 
 /**
@@ -88,6 +90,21 @@ public class Product {
         this.active = active;
     }
 
+    public boolean getStatus() {
+        return active;
+    }
+
+    public boolean setStatus(String status) {
+        if (status.equalsIgnoreCase("Active")) {
+            this.active = true;
+            return true;
+        } else if (status.equalsIgnoreCase("Inactive")) {
+            this.active = false;
+            return true;
+        }
+        return false;
+    }
+
     public String getCategory() {
         return category;
     }
@@ -104,12 +121,28 @@ public class Product {
         this.dateMade = dateMade;
     }
 
+    public void setDateMade(LocalDate localDate) {
+        if (localDate != null) {
+            this.dateMade = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        } else {
+            this.dateMade = null;
+        }
+    }
+
     public Date getExpirationDate() {
         return expirationDate;
     }
 
     public void setExpirationDate(Date expirationDate) {
         this.expirationDate = expirationDate;
+    }
+
+    public void setExpirationDate(LocalDate localDate) {
+        if (localDate != null) {
+            this.expirationDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        } else {
+            this.expirationDate = null;
+        }
     }
 
     // --- Utility methods ---

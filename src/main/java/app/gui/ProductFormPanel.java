@@ -53,12 +53,19 @@ public class ProductFormPanel extends RoundedPanel {
         add(title, c);
 
         // Row 1: ID + Description
-        idField = new JTextField(); idField.setColumns(8); idField.setEditable(true);
+        idField = new JTextField(); 
+        idField.setColumns(8); 
+        idField.setEditable(true);
+        idField.setName("id");
+        idField.setInputVerifier(new ProductInputVerifier());
         LabeledField idLf = new LabeledField("ID:", idField, 80);
         c.gridy = 1; c.gridwidth = 1; c.weightx = 0;
         add(idLf, c);
 
-        descField = new JTextField(); descField.setColumns(30);
+        descField = new JTextField(); 
+        descField.setColumns(30);
+        descField.setName("description");
+        descField.setInputVerifier(new ProductInputVerifier());
         LabeledField descLf = new LabeledField("Description:", descField, 100);
         c.gridx = 1; c.gridwidth = 3; c.weightx = 1.0;
         add(descLf, c);
@@ -66,16 +73,21 @@ public class ProductFormPanel extends RoundedPanel {
         // Row 2: Brand / Content / Price
         c.gridy = 2; c.gridx = 0; c.gridwidth = 1; c.weightx = 0.2;
         brandCombo = new JComboBox<>(new String[]{"", "Generic", "Acme", "BrandX"});
+        brandCombo.setEditable(true);
         LabeledField brandLf = new LabeledField("Brand:", brandCombo, 80);
         add(brandLf, c);
 
         c.gridx = 1; c.gridwidth = 2; c.weightx = 0.6;
         contentField = new JTextField();
+        contentField.setName("content");
+        contentField.setInputVerifier(new ProductInputVerifier());
         LabeledField contentLf = new LabeledField("Content:", contentField, 80);
         add(contentLf, c);
 
         c.gridx = 3; c.gridwidth = 1; c.weightx = 0.2;
         priceField = new CurrencyField();
+        priceField.setName("price");
+        priceField.setInputVerifier(new ProductInputVerifier());
         LabeledField priceLf = new LabeledField("Price:", priceField, 64);
         add(priceLf, c);
 
@@ -91,7 +103,7 @@ public class ProductFormPanel extends RoundedPanel {
         categoryPanel.setOpaque(false);
         categoryPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "Category"));
         categoryGroup = new ButtonGroup();
-        String[] cats = {"Groceries", "Personal hygiene", "Fruits and vegetables", "Wines and spirits"};
+        String[] cats = {"Groceries", "Personal Hygiene", "Fruits & Vegetables", "Wines & Liquors"};
         for (String s: cats) {
             JRadioButton r = new JRadioButton(s);
             r.setOpaque(false);

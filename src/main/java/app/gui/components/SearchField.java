@@ -1,11 +1,11 @@
 package app.gui.components;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -16,8 +16,7 @@ import javax.swing.event.DocumentListener;
 */
 public class SearchField extends JPanel {
     private final JTextField textField;
-    private final JButton searchBtn;
-    private final JButton refreshBtn;
+    private final RoundedButton searchBtn, refreshBtn;
 
     public SearchField() {
         setOpaque(false);
@@ -38,19 +37,27 @@ public class SearchField extends JPanel {
 
         JPanel actions = new JPanel(new GridLayout(1, 2, 8, 0));
         actions.setOpaque(false);
-        searchBtn = new JButton();
-        searchBtn.setToolTipText("Search (Enter)");
-        searchBtn.setPreferredSize(new Dimension(36, 36));
-        searchBtn.setFocusPainted(false);
-        searchBtn.setBorderPainted(false);
-        searchBtn.setText("🔍");
 
+        searchBtn = new RoundedButton("", "/static/icons/search.png");
+        searchBtn.setToolTipText("Search (Enter)");
+        searchBtn.setFixedWidth(36);
+        searchBtn.setFixedHeight(36);
+        searchBtn.setBg(new Color(0x00, 0x4E, 0x7A));
+
+        refreshBtn = new RoundedButton("", "/static/icons/refresh.png");
+        refreshBtn.setToolTipText("Refresh (Enter)");
+        refreshBtn.setFixedWidth(36);
+        refreshBtn.setFixedHeight(36);
+        refreshBtn.setBg(new Color(0x00, 0x4E, 0x7A));
+
+        /* 
         refreshBtn = new JButton();
         refreshBtn.setToolTipText("Refresh");
         refreshBtn.setPreferredSize(new Dimension(36, 36));
         refreshBtn.setText("⟳");
         refreshBtn.setFocusPainted(false);
         refreshBtn.setBorderPainted(false);
+        */
 
         actions.add(searchBtn);
         actions.add(refreshBtn);

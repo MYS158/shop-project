@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class QuickDbTest {
-    public static void test() throws Exception {
+    public static void main(String[] args) throws Exception {
         String url = "jdbc:mysql://127.0.0.1:3306/shopdb?useSSL=false&serverTimezone=UTC",
                user = "test",
                pass = "1234";
