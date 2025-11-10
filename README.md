@@ -26,7 +26,7 @@ A Java-based inventory management application that uses a **MySQL database** and
 | ------------------------------------------------------------------------------------------------------------- |
 | | ID: | TextField |  Description: | TextField                |                                    | | Add | Update | Delete | Search |
 | | Brand: | ComboBox |  Content: | TextField |  Price: | TextField |                               |                                  |
-| | Category: (RadioButtons) | Abarrotes | Personal Hygiene | Fruits & Vegetables | Wines & Liquors | |                                |
+| | Category: (RadioButtons) | Groceries | Personal Hygiene | Fruits & Vegetables | Wines & Liquors | |                                |
 | | Status: | Checkbox (Active) |                                                                      |                                  |
 | | Date made: | DateField (JCalendar) |                                                                |                                  |
 | | Expiration date: | DateField (JCalendar) |                                                        |                                  |
@@ -50,17 +50,17 @@ A Java-based inventory management application that uses a **MySQL database** and
 
 **Table:** `Product`
 
-| Column          | Type           | Constraints                        |
-|-----------------|----------------|------------------------------------|
-| id              | INT            | PRIMARY KEY, AUTO_INCREMENT, UNIQUE |
-| description     | VARCHAR(30)    | NOT NULL                           |
-| brand           | VARCHAR(30)    | NOT NULL                           |
-| content         | VARCHAR(30)    | NOT NULL                           |
-| category        | VARCHAR(30)    | NOT NULL                           |
-| price           | DECIMAL(10,2)  | NOT NULL                           |
-| status          | VARCHAR(15)    | NOT NULL                           |
-| dateMade        | DATE           | NOT NULL                           |
-| expirationDate  | DATE           | NULL                               |
+| Column          | Type           | Constraints         |
+|-----------------|----------------|---------------------|
+| id              | INT            | PRIMARY KEY, UNIQUE |
+| description     | VARCHAR(30)    | NOT NULL            |
+| brand           | VARCHAR(30)    | NOT NULL            |
+| content         | VARCHAR(30)    | NOT NULL            |
+| category        | VARCHAR(30)    | NOT NULL            |
+| price           | DECIMAL(10,2)  | NOT NULL            |
+| status          | VARCHAR(15)    | NOT NULL            |
+| dateMade        | DATE           | NOT NULL            |
+| expirationDate  | DATE           | NULL                |
 
 **Engine:** InnoDB  
 **Charset:** UTF8MB4
@@ -81,6 +81,7 @@ A Java-based inventory management application that uses a **MySQL database** and
 
 ```
 shop-project/
+├── .gitignore
 ├── pom.xml                         # Maven configuration
 ├── README.md                       # Documentation (this file)
 ├── sql/
@@ -98,10 +99,18 @@ shop-project/
 │   │   │       │   ├── ProductFormPanel.java
 │   │   │       │   ├── ProductTablePanel.java
 │   │   │       │   ├── SearchPanel.java
+│   │   │       │   ├── RoundedPanel.java
+│   │   │       │   ├── ShopController.java
+│   │   │       │   ├── RightButtonPanel.java
 │   │   │       │   └── components/               # Specialized component classes
+│   │   │       │       ├── CurrencyField.java      
+│   │   │       │       ├── DatePickerField.java        
+│   │   │       │       ├── LabeledField.java
+│   │   │       │       ├── RoundedButton.java
+│   │   │       │       ├── SearchField.java    
+│   │   │       │       └── StyledLabel.java           
 │   │   │       ├── model/
-│   │   │       │   ├── Product.java
-│   │   │       │   └── ProductDate.java          # Avoid conflict with java.util.Date
+│   │   │       │   └── Product.java
 │   │   │       ├── database/
 │   │   │       │   ├── DatabaseManager.java      # Manages JDBC connections
 │   │   │       │   ├── dao/
@@ -116,12 +125,16 @@ shop-project/
 │   │   │           ├── GuiUtils.java
 │   │   │           └── DateUtils.java
 │   │   └── resources/
-│   │       ├── static/                           
+│   │       ├── static/          
+│   │       │   ├── icons/        
+│   │       │   └── migration/                           
 │   │       └── dynamic/                          # Logs and temporary files
 │   └── test/
 │       ├── java/
 │       │   ├── integration/
-│       │   └── unit/
+│       │   ├── unit/
+│       │   └── other/
+│       │       └── QuickDbTest.java
 │       └── resources/
 └── docs/                                         # Notes, user manual, screenshots
 ```
@@ -132,7 +145,7 @@ shop-project/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/shop-project.git
+   git clone https://github.com/MYS158/shop-project.git
    cd shop-project
    ```
 

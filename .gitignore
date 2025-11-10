@@ -9,3 +9,4 @@
 node_modules/
 target/
 .DS_Store
+config/db.properties
