@@ -72,23 +72,27 @@ public class ProductFormPanel extends RoundedPanel {
 
         // Row 2: Brand / Content / Price
         c.gridy = 2; c.gridx = 0; c.gridwidth = 1; c.weightx = 0.2;
-        brandCombo = new JComboBox<>(new String[]{"", "Generic", "Acme", "BrandX"});
+        brandCombo = new JComboBox<>(new String[]{
+            "", "Generic", "Acme", "BrandX", "BrandZ", 
+            "Coca-Cola", "Pepsi", "Nestle", "Unilever", 
+            "P&G", "Johnson & Johnson", "Kraft", "Kellogg's"
+        });
         brandCombo.setEditable(true);
         LabeledField brandLf = new LabeledField("Brand:", brandCombo, 80);
         add(brandLf, c);
 
-        c.gridx = 1; c.gridwidth = 2; c.weightx = 0.6;
+        c.gridx = 1; c.gridwidth = 2; c.weightx = 0.5;
         contentField = new JTextField();
         contentField.setName("content");
         contentField.setInputVerifier(new ProductInputVerifier());
         LabeledField contentLf = new LabeledField("Content:", contentField, 80);
         add(contentLf, c);
 
-        c.gridx = 3; c.gridwidth = 1; c.weightx = 0.2;
+        c.gridx = 3; c.gridwidth = 1; c.weightx = 0.3;
         priceField = new CurrencyField();
         priceField.setName("price");
         priceField.setInputVerifier(new ProductInputVerifier());
-        LabeledField priceLf = new LabeledField("Price:", priceField, 64);
+        LabeledField priceLf = new LabeledField("Price:", priceField, 80);
         add(priceLf, c);
 
         // Row 3: Status + Categories

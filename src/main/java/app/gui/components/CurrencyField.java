@@ -15,7 +15,7 @@ import javax.swing.JFormattedTextField;
 public class CurrencyField extends JFormattedTextField {
     public CurrencyField() {
         super(NumberFormat.getNumberInstance());
-        setColumns(8);
+        setColumns(16);
         setValue(0.0);
         setToolTipText("Enter price (numeric)");
         

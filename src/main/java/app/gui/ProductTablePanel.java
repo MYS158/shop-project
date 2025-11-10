@@ -1,9 +1,12 @@
 package app.gui;
 
 import java.awt.BorderLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -16,6 +19,7 @@ import app.model.Product;
 
 /**
  * Table panel showing product results. Backed by an in-memory list for now.
+ * Supports double-click to load product into form.
  */
 public class ProductTablePanel extends RoundedPanel {
     private final JTable table;
@@ -37,6 +41,24 @@ public class ProductTablePanel extends RoundedPanel {
 
         JScrollPane sp = new JScrollPane(table);
         add(sp, BorderLayout.CENTER);
+    }
+
+    /**
+     * Adds a double-click listener to the table.
+     * When a row is double-clicked, the consumer is invoked with the selected product.
+     */
+    public void addDoubleClickListener(Consumer<Product> onDoubleClick) {
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    Product selected = getSelected();
+                    if (selected != null) {
+                        onDoubleClick.accept(selected);
+                    }
+                }
+            }
+        });
     }
 
     public void setProducts(List<Product> products) { model.setProducts(products); }

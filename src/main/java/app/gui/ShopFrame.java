@@ -25,12 +25,13 @@ import app.database.dao.ProductDaoImpl;
  * UI composition only. Business logic is delegated to ShopController.
  */
 public class ShopFrame extends JFrame {
-    private static final Dimension MIN_DIMENSION = new Dimension(1100, 520);
+    private static final Dimension MIN_DIMENSION = new Dimension(1250, 520);
 
     private final ProductFormPanel formPanel = new ProductFormPanel();
     private final ProductTablePanel tablePanel = new ProductTablePanel();
     private final SearchPanel searchPanel = new SearchPanel();
     private final RightButtonPanel rightButtonPanel = new RightButtonPanel();
+    private final UtilityButtonPanel utilityButtonPanel = new UtilityButtonPanel();
 
     // DB / DAO references passed to controller (may be null)
     private DatabaseManager db;
@@ -70,26 +71,27 @@ public class ShopFrame extends JFrame {
         c.insets = new Insets(8, 8, 8, 8);
         c.fill = GridBagConstraints.BOTH;
 
-        // left column: form, search, table
-        c.gridx = 0; c.gridy = 0; c.weightx = 1.0; c.weighty = 0.0; c.gridheight = 1;
-        formPanel.setPreferredSize(new Dimension(780, 220));
+        c.gridx = 0; c.gridy = 0; c.weightx = 1.0; c.weighty = 0.3; c.gridheight = 1;
         main.add(formPanel, c);
 
-        c.gridy = 1; c.weighty = 0.0;
-        searchPanel.setPreferredSize(new Dimension(780, 64));
+        c.gridy = 1; c.weighty = 0.1;
         main.add(searchPanel, c);
 
-        c.gridy = 2; c.weighty = 1.0;
+        c.gridy = 2; c.weighty = 0.6;
         main.add(tablePanel, c);
 
         // right column: buttons (encapsulated)
-        c.gridx = 1; c.gridy = 0; c.gridheight = 3; c.weightx = 0.0; c.weighty = 1.0;
+        c.gridx = 1; c.gridy = 0; c.gridheight = 2; c.weightx = 0.0; c.weighty = 0.6;
         main.add(rightButtonPanel, c);
+        
+        // far right column: utility buttons
+        c.gridx = 2; c.gridy = 0; c.gridheight = 3; c.weightx = 0.0; c.weighty = 1.0;
+        main.add(utilityButtonPanel, c);
 
         setContentPane(main);
 
         // delegate behavior to controller
-        new ShopController(formPanel, tablePanel, searchPanel, rightButtonPanel, db, dao);
+        new ShopController(formPanel, tablePanel, searchPanel, rightButtonPanel, utilityButtonPanel, db, dao);
     }
 
     private Properties loadDbProperties() throws Exception {
@@ -121,7 +123,7 @@ public class ShopFrame extends JFrame {
      */
     private void showDatabaseConnectionWarning(Exception ex) {
         StringBuilder message = new StringBuilder();
-        message.append("⚠️ Database Connection Failed\n\n");
+        message.append("Database Connection Failed\n\n");
         message.append("The application could not connect to the database.\n\n");
         
         // Provide specific guidance based on error type

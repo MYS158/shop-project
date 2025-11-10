@@ -1,17 +1,24 @@
 package app.gui;
 
 import java.awt.HeadlessException;
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import app.database.DatabaseManager;
 import app.database.dao.ProductDao;
 import app.model.Product;
+import app.util.CsvUtils;
 import app.util.ValidationResult;
 import app.util.ValidationUtils;
 
@@ -23,23 +30,26 @@ import app.util.ValidationUtils;
  *  - load initial data (from DAO or demo list)
  *  - perform create/read/update/delete using ProductDao or fallback memory list
  *  - wire listeners for RightButtonPanel and SearchPanel
+ *  - handle export/import/statistics operations
  */
 public class ShopController {
     private final ProductFormPanel form;
     private final ProductTablePanel table;
     private final SearchPanel search;
     private final RightButtonPanel actions;
+    private final UtilityButtonPanel utilityActions;
     private final ProductDao dao;
 
     // fallback in-memory store when dao == null
     private final List<Product> memory = new ArrayList<>();
 
     public ShopController(ProductFormPanel form, ProductTablePanel table, SearchPanel search,
-                          RightButtonPanel actions, DatabaseManager db, ProductDao dao) {
+                          RightButtonPanel actions, UtilityButtonPanel utilityActions, DatabaseManager db, ProductDao dao) {
         this.form = form;
         this.table = table;
         this.search = search;
         this.actions = actions;
+        this.utilityActions = utilityActions;
         this.dao = dao;
 
         wire();
@@ -55,6 +65,14 @@ public class ShopController {
         // search wiring
         search.addSearchListener(ae -> onSearch());
         search.addRefreshListener(ae -> loadInitialData());
+        
+        // double-click to load product into form
+        table.addDoubleClickListener(product -> form.fromProduct(product));
+        
+        // utility actions
+        utilityActions.addExportListener(e -> onExport());
+        utilityActions.addImportListener(e -> onImport());
+        utilityActions.addStatsListener(e -> onStats());
     }
 
     private void loadInitialData() {
@@ -105,7 +123,7 @@ public class ShopController {
         } catch (SQLException ex) {
             if (ex.getMessage() != null && ex.getMessage().contains("Duplicate entry")) {
                 JOptionPane.showMessageDialog(null, 
-                    "Product with ID " + form.toProduct().getId() + " already exists.\nPlease use a different ID.", 
+                    String.format("Product with ID %d already exists.\nPlease use a different ID.", form.toProduct().getId()), 
                     "Duplicate Product", 
                     JOptionPane.WARNING_MESSAGE);
             } else {
@@ -196,16 +214,24 @@ public class ShopController {
     }
 
     private void onSearch() {
-        String q = search.getQuery().trim().toLowerCase();
+        String q = search.getQuery().trim();
         if (q.isBlank()) { loadInitialData(); return; }
+
+        String searchType = search.getSearchType();
+        String lowerQuery = q.toLowerCase();
 
         try {
             if (dao != null) {
-                table.setProducts(dao.searchByDescription(q));
+                // For database mode, get all and filter (since DAO only has searchByDescription)
+                List<Product> allProducts = dao.findAll();
+                List<Product> filtered = allProducts.stream()
+                        .filter(pr -> matchesSearchCriteria(pr, lowerQuery, searchType))
+                        .toList();
+                table.setProducts(filtered);
             } else {
+                // For demo mode, implement multi-criteria search
                 List<Product> filtered = memory.stream()
-                        .filter(pr -> (pr.getDescription() != null && pr.getDescription().toLowerCase().contains(q)) ||
-                                      (pr.getBrand() != null && pr.getBrand().toLowerCase().contains(q)))
+                        .filter(pr -> matchesSearchCriteria(pr, lowerQuery, searchType))
                         .toList();
                 table.setProducts(filtered);
             }
@@ -214,17 +240,42 @@ public class ShopController {
         }
     }
 
+    /**
+     * Checks if a product matches the search criteria based on the selected field.
+     */
+    private boolean matchesSearchCriteria(Product pr, String query, String searchType) {
+        return switch (searchType) {
+            case "Description" -> pr.getDescription() != null && pr.getDescription().toLowerCase().contains(query);
+            case "Brand" -> pr.getBrand() != null && pr.getBrand().toLowerCase().contains(query);
+            case "Category" -> pr.getCategory() != null && pr.getCategory().toLowerCase().contains(query);
+            case "ID" -> {
+                try {
+                    int searchId = Integer.parseInt(query);
+                    yield pr.getId() == searchId;
+                } catch (NumberFormatException e) {
+                    yield false;
+                }
+            }
+            default -> // "All" - search across all fields
+                    (pr.getDescription() != null && pr.getDescription().toLowerCase().contains(query)) ||
+                    (pr.getBrand() != null && pr.getBrand().toLowerCase().contains(query)) ||
+                    (pr.getCategory() != null && pr.getCategory().toLowerCase().contains(query)) ||
+                    (pr.getContent() != null && pr.getContent().toLowerCase().contains(query)) ||
+                    String.valueOf(pr.getId()).contains(query);
+        };
+    }
+
     private Product sampleProduct(int id, String desc, String brand, double price, boolean active, String category) {
         Product p = new Product();
         p.setId(id);
         p.setDescription(desc);
         p.setBrand(brand);
         p.setContent("1 unit");
-        // adapt if Product.price is BigDecimal in your model; for this demo assume double setter exists
+        // adapt if Product.price is BigDecimal in model; for this demo double setter exists
         try {
             // prefer double -> BigDecimal safe setter
             p.setPrice(price);
-        } catch (Throwable ignore) { /* if your Product uses BigDecimal, adapt accordingly */ }
+        } catch (Throwable ignore) { /* if BigDecimal is used in Product, adapt accordingly */ }
         p.setActive(active);
         p.setCategory(category);
         p.setDateMade(new java.util.Date());
@@ -314,6 +365,104 @@ public class ShopController {
     }
 
     private void showError(String title, Exception ex) {
-        JOptionPane.showMessageDialog(null, title + ":\n" + ex.getMessage(), title, JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(null, String.format("%s:\n%s", title, ex.getMessage()), title, JOptionPane.ERROR_MESSAGE);
+    }
+
+    /**
+     * Exports all products to a CSV file.
+     */
+    private void onExport() {
+        try {
+            List<Product> products = dao != null ? dao.findAll() : new ArrayList<>(memory);
+            
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Export Products to CSV");
+            fileChooser.setFileFilter(new FileNameExtensionFilter("CSV Files (*.csv)", "csv"));
+            fileChooser.setSelectedFile(new File("products_export.csv"));
+            
+            int result = fileChooser.showSaveDialog(null);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                if (!file.getName().endsWith(".csv")) {
+                    file = new File(String.format("%s.csv", file.getAbsolutePath()));
+                }
+                
+                CsvUtils.exportToCsv(products, file);
+                JOptionPane.showMessageDialog(null, 
+                    String.format("Successfully exported %d products to:\n%s", products.size(), file.getAbsolutePath()),
+                    "Export Successful", 
+                    JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (HeadlessException | IOException | SQLException ex) {
+            showError("Export failed", ex);
+        }
+    }
+
+    /**
+     * Imports products from a CSV file.
+     */
+    private void onImport() {
+        int confirm = JOptionPane.showConfirmDialog(null,
+                "Import will add products from CSV file.\nContinue?",
+                "Confirm Import",
+                JOptionPane.YES_NO_OPTION);
+        
+        if (confirm != JOptionPane.YES_OPTION) return;
+        
+        try {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Import Products from CSV");
+            fileChooser.setFileFilter(new FileNameExtensionFilter("CSV Files (*.csv)", "csv"));
+            
+            int result = fileChooser.showOpenDialog(null);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                List<Product> imported = CsvUtils.importFromCsv(file);
+                
+                int successCount = 0;
+                int errorCount = 0;
+                
+                for (Product p : imported) {
+                    try {
+                        if (dao != null) {
+                            dao.create(p);
+                        } else {
+                            memory.add(p);
+                        }
+                        successCount++;
+                    } catch (SQLException e) {
+                        errorCount++;
+                        System.err.println(String.format("Failed to import product ID %d: %s", p.getId(), e.getMessage()));
+                    }
+                }
+                
+                loadInitialData();
+                
+                JOptionPane.showMessageDialog(null,
+                    String.format("""
+                    Import completed!
+                    Successfully imported: %d
+                    Failed: %d""", successCount, errorCount),
+                    "Import Complete",
+                    JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (HeadlessException | IOException ex) {
+            showError("Import failed", ex);
+        }
+    }
+
+    /**
+     * Shows statistics dialog with product analytics.
+     */
+    private void onStats() {
+        try {
+            List<Product> products = dao != null ? dao.findAll() : new ArrayList<>(memory);
+            
+            JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(table);
+            StatisticsDialog dialog = new StatisticsDialog(parentFrame, products);
+            dialog.setVisible(true);
+        } catch (SQLException ex) {
+            showError("Failed to load statistics", ex);
+        }
     }
 }

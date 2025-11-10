@@ -13,24 +13,29 @@ import javax.swing.event.DocumentListener;
 
 /**
 * Search field with placeholder behavior and small round action buttons.
+* Supports multi-criteria search by field type.
 */
 public class SearchField extends JPanel {
     private final JTextField textField;
     private final RoundedButton searchBtn, refreshBtn;
+    private final JComboBox<String> searchTypeCombo;
 
     public SearchField() {
         setOpaque(false);
         setLayout(new BorderLayout(8, 0));
+        setPreferredSize(new Dimension(0, 36)); // Set fixed height
 
         JPanel left = new JPanel(new BorderLayout(6, 0));
         left.setOpaque(false);
 
-        JComboBox<String> combo = new JComboBox<>(new String[]{"All", "Description", "Brand", "ID"});
-        combo.setPreferredSize(new Dimension(140, 28));
-        left.add(combo, BorderLayout.WEST);
+        searchTypeCombo = new JComboBox<>(new String[]{"All", "Description", "Brand", "Category", "ID"});
+        searchTypeCombo.setPreferredSize(new Dimension(140, 32));
+        searchTypeCombo.setToolTipText("Select search field");
+        left.add(searchTypeCombo, BorderLayout.WEST);
 
         textField = new JTextField();
-        textField.setToolTipText("Search by description, brand, id...");
+        textField.setPreferredSize(new Dimension(0, 32)); // Set fixed height
+        textField.setToolTipText("Search by description, brand, category, id...");
         left.add(textField, BorderLayout.CENTER);
 
         add(left, BorderLayout.CENTER);
@@ -45,10 +50,13 @@ public class SearchField extends JPanel {
         searchBtn.setBg(new Color(0x00, 0x4E, 0x7A));
 
         refreshBtn = new RoundedButton("", "/static/icons/refresh.png");
-        refreshBtn.setToolTipText("Refresh (Enter)");
+        refreshBtn.setToolTipText("Refresh");
         refreshBtn.setFixedWidth(36);
         refreshBtn.setFixedHeight(36);
         refreshBtn.setBg(new Color(0x00, 0x4E, 0x7A));
+        
+        // Add Enter key support for search
+        textField.addActionListener(e -> searchBtn.doClick());
 
         /* 
         refreshBtn = new JButton();
@@ -69,4 +77,6 @@ public class SearchField extends JPanel {
     public void addQueryListener(DocumentListener l) { textField.getDocument().addDocumentListener(l); }
     public String getQuery() { return textField.getText(); }
     public void setQuery(String q) { textField.setText(q); }
+    public String getSearchType() { return (String) searchTypeCombo.getSelectedItem(); }
+    public JComboBox<String> getSearchTypeCombo() { return searchTypeCombo; }
 }

@@ -136,7 +136,7 @@ public class RoundedButton extends JButton {
                 this.customIcon = img == null ? null : scaleToIcon(img);
             }
         } catch (IOException ex) {
-            System.err.println("RoundedButton: failed to load resource '" + resourcePath + "': " + ex.getMessage());
+            System.err.println(String.format("RoundedButton: failed to load resource '%s': %s", resourcePath, ex.getMessage()));
             this.customIcon = null;
         }
         revalidate(); repaint();
@@ -159,7 +159,7 @@ public class RoundedButton extends JButton {
             }
             this.customIcon = img == null ? null : scaleToIcon(img);
         } catch (IOException ex) {
-            System.err.println("RoundedButton: failed to load path/url '" + pathOrUrl + "': " + ex.getMessage());
+            System.err.println(String.format("RoundedButton: failed to load path/url '%s': %s", pathOrUrl, ex.getMessage()));
             this.customIcon = null;
         }
         revalidate(); repaint();

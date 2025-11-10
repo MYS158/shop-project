@@ -42,7 +42,7 @@ public class ValidationUtilsTest {
                 "Milk 1L",
                 "BrandX",
                 "1L bottle",
-                "Abarrotes",
+                "Groceries",
                 10.5,
                 "Active",
                 LocalDate.now().minusDays(2),

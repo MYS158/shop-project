@@ -13,6 +13,6 @@ public class ValidationResult {
 
     @Override
     public String toString() {
-        return "ValidationResult{valid=" + isValid() + ", errors=" + errors + "}";
+        return String.format("ValidationResult{valid=%s, errors=%s}", isValid(), errors);
     }
 }

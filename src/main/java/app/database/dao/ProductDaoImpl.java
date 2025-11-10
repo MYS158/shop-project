@@ -33,7 +33,7 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public Product create(Product p) throws SQLException {
-        String sql = "INSERT INTO Product (id, description, brand, content, category, price, status, dateMade, expirationDate) "
+        String sql = "INSERT INTO products (id, description, brand, content, category, price, status, dateMade, expirationDate) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = connectionSupplier.get();
             PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -65,7 +65,7 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public Optional<Product> findById(int id) throws SQLException {
-        String sql = "SELECT * FROM Product WHERE id = ?";
+        String sql = "SELECT * FROM products WHERE id = ?";
         try (Connection conn = connectionSupplier.get();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -98,7 +98,7 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public boolean update(Product p) throws SQLException {
-        String sql = "UPDATE Product SET description=?, brand=?, content=?, category=?, price=?, status=?, dateMade=?, expirationDate=? WHERE id=?";
+        String sql = "UPDATE products SET description=?, brand=?, content=?, category=?, price=?, status=?, dateMade=?, expirationDate=? WHERE id=?";
         try (Connection conn = connectionSupplier.get();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, p.getDescription());
@@ -127,7 +127,7 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public boolean deleteById(int id) throws SQLException {
-        String sql = "DELETE FROM Product WHERE id = ?";
+        String sql = "DELETE FROM products WHERE id = ?";
         try (Connection conn = connectionSupplier.get();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -137,7 +137,7 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public List<Product> findAll() throws SQLException {
-        String sql = "SELECT * FROM Product";
+        String sql = "SELECT * FROM products";
         List<Product> products = new ArrayList<>();
         try (Connection conn = connectionSupplier.get();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -151,11 +151,11 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public List<Product> searchByDescription(String descriptionPattern) throws SQLException {
-        String sql = "SELECT * FROM Product WHERE description LIKE ?";
+        String sql = "SELECT * FROM products WHERE description LIKE ?";
         List<Product> products = new ArrayList<>();
         try (Connection conn = connectionSupplier.get();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, "%" + descriptionPattern + "%");
+            ps.setString(1, String.format("%%%s%%", descriptionPattern));
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     products.add(mapRow(rs));
@@ -167,7 +167,7 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public long count() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM Product";
+        String sql = "SELECT COUNT(*) FROM products";
         try (Connection conn = connectionSupplier.get();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -180,7 +180,7 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public boolean existsById(int id) throws SQLException {
-        String sql = "SELECT 1 FROM Product WHERE id = ?";
+        String sql = "SELECT 1 FROM products WHERE id = ?";
         try (Connection conn = connectionSupplier.get();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);

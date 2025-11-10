@@ -142,7 +142,7 @@ public class ShopControllerValidationTest {
         p.setDescription("Valid Product");
         p.setBrand("ValidBrand");
         p.setContent("1 unit");
-        p.setCategory("Abarrotes");
+        p.setCategory("Groceries");
         p.setPrice(25.50);
         p.setActive(true);
         p.setDateMade(new Date());

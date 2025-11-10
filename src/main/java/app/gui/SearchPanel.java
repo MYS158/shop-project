@@ -25,4 +25,5 @@ public class SearchPanel extends RoundedPanel {
     public void addSearchListener(ActionListener a) { searchField.addSearchListener(a); }
     public void addRefreshListener(ActionListener a) { searchField.addRefreshListener(a); }
     public String getQuery() { return searchField.getQuery(); }
+    public String getSearchType() { return searchField.getSearchType(); }
 }

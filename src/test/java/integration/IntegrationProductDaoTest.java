@@ -36,12 +36,12 @@ public class IntegrationProductDaoTest {
     private ProductDao dao;
 
     @BeforeAll
-    void setup() throws Exception {
-        realConn = DriverManager.getConnection("jdbc:h2:mem:shopdb;DB_CLOSE_DELAY=-1;MODE=MySQL", "sa", "");
+    public void setup() throws Exception {
+        realConn = DriverManager.getConnection("jdbc:h2:mem:shopdb;DB_CLOSE_DELAY=-1;MODE=MySQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE", "sa", "");
         
         // H2-compatible schema (removed MySQL-specific syntax)
         String schemaSql = """
-            CREATE TABLE IF NOT EXISTS Product (
+            CREATE TABLE IF NOT EXISTS products (
                 id INT NOT NULL PRIMARY KEY,
                 description VARCHAR(30) NOT NULL,
                 brand VARCHAR(30) NOT NULL,
@@ -60,12 +60,12 @@ public class IntegrationProductDaoTest {
     }
 
     @BeforeEach
-    void clearTable() throws Exception {
-        realConn.createStatement().execute("DELETE FROM Product");
+    public void clearTable() throws Exception {
+        realConn.createStatement().execute("DELETE FROM products");
     }
 
     @AfterAll
-    void cleanup() throws Exception {
+    public void cleanup() throws Exception {
         if (realConn != null) realConn.close();
     }
 
