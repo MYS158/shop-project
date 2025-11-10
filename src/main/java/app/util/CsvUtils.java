@@ -47,8 +47,9 @@ public final class CsvUtils {
         List<Product> products = new ArrayList<>();
         
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line = reader.readLine(); // Skip header
+            reader.readLine(); // Skip header
             
+            String line;
             while ((line = reader.readLine()) != null) {
                 try {
                     Product p = csvLineToProduct(line);
